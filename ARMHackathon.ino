@@ -1,8 +1,10 @@
+// Include necessary libraries
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <DHT.h>
 #include <RTClib.h>
 
+// Define constant values for pins and sensor types
 #define DHTTYPE DHT22
 #define DHTPIN 2
 #define SOILPIN A0
@@ -11,11 +13,12 @@
 #define LEDPIN 13
 #define I2C_ADDR 0x27
 
+// Initialize LiquidCrystal_I2C and DHT objects, and RTC_DS1307 object
 LiquidCrystal_I2C lcd(I2C_ADDR,16,2);
 DHT dht(DHTPIN, DHTTYPE);
 RTC_DS1307 rtc;
 
-
+// Function to display current time on LCD and Serial monitor
 void displayTime() {
   DateTime now = rtc.now();
   lcd.setCursor(0, 0);
@@ -31,16 +34,21 @@ void displayTime() {
   Serial.print(':');
   Serial.print(now.minute(), DEC);
   Serial.print(':');
-  Serial.print(now.second(), DEC);
-  
+  Serial.print(now.second(), DEC); 
 }
+
+// Function to display current temperature and humidity on LCD and Serial monitor
 void displayTempHum() {
   float h = dht.readHumidity();
   float t = dht.readTemperature();
+  
+  // Check if sensor reading is valid
   if (isnan(h) || isnan(t)) {
     Serial.println("Failed to read from DHT sensor!");
     return;
   }
+  
+  // Display temperature and humidity on LCD
   lcd.setCursor(0, 1);
   lcd.print("Temp: ");
   lcd.print(t);
@@ -49,11 +57,14 @@ void displayTempHum() {
   lcd.print(" Humidity: ");
   lcd.print(h);
   lcd.print("%");
+  
+  // Scroll the text to the left on LCD display
   for (int i = 0; i < 16; i++) {
     lcd.scrollDisplayLeft();
     delay(200);
   }
  
+  // Display temperature and humidity on Serial monitor
   Serial.print("\nTemp: ");
   Serial.print(t);
   Serial.print((char)223);
@@ -62,6 +73,8 @@ void displayTempHum() {
   Serial.print(h);
   Serial.print("%");
 }
+
+// Function to display current soil moisture level on LCD and Serial monitor
 void displaySoilMoisture() {
   lcd.clear();
   int soilMoisture = analogRead(SOILPIN);
@@ -73,6 +86,7 @@ void displaySoilMoisture() {
   Serial.print(soilMoisture);
 }
 
+// Function to check temperature level and trigger LED and buzzer if it is above threshold
 void checkTemp() {
   float t = dht.readTemperature();
   if (t >= 30) {
@@ -84,11 +98,14 @@ void checkTemp() {
   }
 }
 
+// Function to check humidity level and trigger LED and buzzer if it is below threshold
 void checkHumidity() {
   float h = dht.readHumidity();
   if (h <= 30) {
     digitalWrite(LEDPIN, HIGH);
     tone(BUZZERPIN, 1000, 1000);
+ 
+
   } else {
     digitalWrite(LEDPIN, LOW);
     noTone(BUZZERPIN);
@@ -106,7 +123,7 @@ void checkSoilMoisture() {
 }
 void checkLight() {
   int lightLevel = analogRead(LDRPIN);
-  if (lightLevel < 100) {
+  if (lightLevel > 100) {
     digitalWrite(LEDPIN, HIGH);
     tone(BUZZERPIN, 1000, 1000);
   } else {
@@ -137,11 +154,11 @@ void setup() {
   dht.begin();
   Wire.begin();
   rtc.begin();
-//  if (! rtc.isrunning()) {
-//    lcd.setCursor(0, 0);
-//    lcd.print("RTC is NOT running!");
-//    rtc.adjust(DateTime(__DATE__, __TIME__));
-//  }
+if (! rtc.isrunning()) {
+    lcd.setCursor(0, 0);
+  lcd.print("RTC is NOT running!");
+  rtc.adjust(DateTime(__DATE__, __TIME__));
+  }
   lcd.clear();
   lcd.print("System ready!");
 }
@@ -159,7 +176,7 @@ void loop() {
   displaySoilMoisture();
   
   checkLight();
-   displayLight();
+  displayLight();
   
   
   delay(2000);
@@ -172,6 +189,3 @@ void loop() {
   lcd.clear();
   delay(1000);
 }
-
-
-
