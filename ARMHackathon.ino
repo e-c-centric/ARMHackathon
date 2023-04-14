@@ -25,6 +25,14 @@ void displayTime() {
   lcd.print(now.minute(), DEC);
   lcd.print(':');
   lcd.print(now.second(), DEC);
+
+  Serial.print("\nTime: ");
+  Serial.print(now.hour(), DEC);
+  Serial.print(':');
+  Serial.print(now.minute(), DEC);
+  Serial.print(':');
+  Serial.print(now.second(), DEC);
+  
 }
 void displayTempHum() {
   float h = dht.readHumidity();
@@ -41,6 +49,18 @@ void displayTempHum() {
   lcd.print(" Humidity: ");
   lcd.print(h);
   lcd.print("%");
+  for (int i = 0; i < 16; i++) {
+    lcd.scrollDisplayLeft();
+    delay(200);
+  }
+ 
+  Serial.print("\nTemp: ");
+  Serial.print(t);
+  Serial.print((char)223);
+  Serial.print("C");
+  Serial.print(" Humidity: ");
+  Serial.print(h);
+  Serial.print("%");
 }
 void displaySoilMoisture() {
   lcd.clear();
@@ -48,6 +68,9 @@ void displaySoilMoisture() {
   lcd.setCursor(0, 2);
   lcd.print("Soil Moisture:");
   lcd.print(soilMoisture);
+
+  Serial.print("\nSoil Moisture:");
+  Serial.print(soilMoisture);
 }
 
 void checkTemp() {
@@ -96,6 +119,9 @@ void displayLight() {
   lcd.setCursor(0, 3);
   lcd.print("Light Level: ");
   lcd.print(lightLevel);
+
+  Serial.print("\nLight Level: ");
+  Serial.print(lightLevel);
 }
  
 
@@ -120,21 +146,32 @@ void setup() {
   lcd.print("System ready!");
 }
 void loop() {
-  delay(5000);
+  delay(2000);
   lcd.clear();
+  displayTime();
+  delay(1000);
+  
   checkTemp();
   checkHumidity();
-  checkSoilMoisture();
-  checkLight();
+  displayTempHum();
   
-  displayTime();
+  checkSoilMoisture();
+  displaySoilMoisture();
+  
+  checkLight();
+   displayLight();
+  
+  
   delay(2000);
   displayTempHum();
   delay(2000);
-  displaySoilMoisture();
+  
   delay(2000);
-  displayLight();
+ 
   delay(2000);
   lcd.clear();
   delay(1000);
 }
+
+
+
